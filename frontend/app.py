@@ -4,8 +4,8 @@ import json
 import tempfile
 import re
 from gtts import gTTS
-
-BACKEND_URL = "http://localhost:8000"
+import os
+BACKEND_URL = "http://backend:8000"
 
 st.set_page_config(page_title="Adhigam Physics Tutor (AI)", layout="centered")
 st.title("📘 Bhojpuri Physics Tutor (AI-Powered)")
@@ -21,12 +21,11 @@ def clean_js_code(gpt_output: str) -> str:
 
 def speak_text_streamlit(text, lang='hi'):
     tts = gTTS(text=text, lang=lang)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-        tts.save(fp.name)
-        audio_bytes = fp.read()
-        st.audio(fp.name, format="audio/mp3")
-
-
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmpfile:
+        tts.save(tmpfile.name)
+        tmpfile.flush()
+        st.audio(tmpfile.name, format="audio/mp3")
+        os.remove(tmpfile.name)  # Clean up the temporary file
 
 def render_p5_code(js_code: str):
     html_template = f"""
